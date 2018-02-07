@@ -1,6 +1,6 @@
 <?php
 /**
- * Mysql 导出到 Excel
+ * Mysql 导出到 Csv
  * @auther Sparkle
  */
 
@@ -50,8 +50,8 @@ if (!empty($dbname) && !empty($host) && !empty($port) && !empty($user) && !empty
                             WHERE
                               table_schema = 'hlw' AND table_name = '".$tableNames[$i]['table_name']."'";
 
-                    $data .= "表名: \t".$tableNames[$i]['table_name']."\t 备注: \t".$tableNames[$i]['table_comment']."\t\n";
-                    $data .= mysqlSelect($mysqli, $sql)."\t\n";
+                    $data .= "表名: ,".$tableNames[$i]['table_name'].", 备注: ,".$tableNames[$i]['table_comment'].",\n";
+                    $data .= mysqlSelect($mysqli, $sql).",\n";
                 }
 
                 initExcel();
@@ -87,7 +87,7 @@ if (!empty($dbname) && !empty($host) && !empty($port) && !empty($user) && !empty
             数据库密码: <input name="pwd" value="Gzepro123"><br>
             自定义查询sql (默认导出所有表结构): <br>
             <textarea name="inpsql" cols="40" rows="5"></textarea><br>
-            <input type="submit" value="下载 sql.xls">
+            <input type="submit" value="下载 sql.csv">
         </form>
     </body>
     </html>
@@ -113,14 +113,14 @@ function mysqlSelect($mysqli, $sql)
 
         //循环表头
         foreach ($result->fetch_fields() as $val) {
-            $data .= $val->name . "\t";
+            $data .= $val->name . ",";
         }
         $data .= "\n";
 
         //循环数据
         while ($row = $result->fetch_row()) {
             for ($i = 0; $i < count($row); $i++) {
-                $data .= $row[$i] . "\t";
+                $data .= $row[$i] . ",";
             }
             $data .= "\n";
         }
@@ -136,8 +136,12 @@ function urlGet($key)
 
 function initExcel()
 {
-    header("Content-type:application/vnd.ms-excel");
-    header("Content-Disposition:filename=sql.xls");
+	header('Content-Type:application/download');
+    header("Content-type:text/csv;");
+    header("Content-Disposition:attachment;filename=sql.csv");
+    header('Cache-Control:must-revalidate,post-check=0,pre-check=0');
+    header('Expires:0');
+    header('Pragma:public');
 }
 
 function writeExcel($data)
